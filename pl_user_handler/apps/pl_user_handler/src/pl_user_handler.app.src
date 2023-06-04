@@ -1,11 +1,15 @@
-{application, message_router,
+{application, pl_user_handler,
  [{description, "An OTP application"},
   {vsn, "0.1.0"},
   {registered, []},
-  {mod, {message_router_app, []}},
+  {mod, {pl_user_handler_app, []}},
   {applications,
    [kernel,
-    stdlib
+    stdlib,
+    crypto,
+    cowboy,
+    compiler,
+    lager
    ]},
   {env,[]},
   {modules, []},

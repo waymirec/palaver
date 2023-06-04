@@ -1,9 +1,4 @@
-%%%-------------------------------------------------------------------
-%% @doc message_router top level supervisor.
-%% @end
-%%%-------------------------------------------------------------------
-
--module(message_router_sup).
+-module(pl_message_handler_sup).
 
 -behaviour(supervisor).
 

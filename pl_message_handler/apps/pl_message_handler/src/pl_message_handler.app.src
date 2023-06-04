@@ -1,8 +1,8 @@
-{application, message_handler,
+{application, pl_message_handler,
  [{description, "An OTP application"},
   {vsn, "0.1.0"},
   {registered, []},
-  {mod, {message_handler_app, []}},
+  {mod, {pl_message_handler_app, []}},
   {applications,
    [kernel,
     stdlib

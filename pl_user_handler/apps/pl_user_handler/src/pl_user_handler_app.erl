@@ -1,9 +1,4 @@
-%%%-------------------------------------------------------------------
-%% @doc user_handler public API
-%% @end
-%%%-------------------------------------------------------------------
-
--module(user_handler_app).
+-module(pl_user_handler_app).
 
 -behaviour(application).
 
@@ -24,7 +19,7 @@ start(_StartType, _StartArgs) ->
         #{env => #{dispatch => Dispatch}}
     ),
 
-    user_handler_sup:start_link().
+    pl_user_handler_sup:start_link().
 
 stop(_State) ->
     ok.
