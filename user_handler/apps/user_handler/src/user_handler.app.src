@@ -5,7 +5,11 @@
   {mod, {user_handler_app, []}},
   {applications,
    [kernel,
-    stdlib
+    stdlib,
+    crypto,
+    cowboy,
+    compiler,
+    lager
    ]},
   {env,[]},
   {modules, []},
