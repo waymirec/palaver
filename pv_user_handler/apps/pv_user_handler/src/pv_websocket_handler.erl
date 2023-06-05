@@ -27,7 +27,8 @@ websocket_init(State) ->
 
 websocket_handle(Frame = {text, Msg}, State) ->
   lager:debug("Got Data: ~p", [Msg]),
-  pv_kafka_client:send(Msg),
+  {ok, EncodedMsg} = request_encoder:encode_text_message(Msg),
+  pv_kafka_client:send(EncodedMsg),
   {[{text, << "responding to ", Msg/binary >>}], State};
 
 websocket_handle(_Frame, State) ->

@@ -1,0 +1,1 @@
+-define(OPCODE_SEND_MESSAGE, 1).
