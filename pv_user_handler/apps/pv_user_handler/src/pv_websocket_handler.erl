@@ -1,4 +1,4 @@
--module(websocket_handler).
+-module(pv_websocket_handler).
 
 -export([
   init/2,
@@ -27,6 +27,7 @@ websocket_init(State) ->
 
 websocket_handle(Frame = {text, Msg}, State) ->
   lager:debug("Got Data: ~p", [Msg]),
+  pv_kafka_client:send(Msg),
   {[{text, << "responding to ", Msg/binary >>}], State};
 
 websocket_handle(_Frame, State) ->
