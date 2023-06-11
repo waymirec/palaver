@@ -1,4 +1,9 @@
-version: '2'
+version: '3'
+
+volumes:
+  postgres_data:
+      driver: local
+
 services:
   zookeeper-1:
     image: confluentinc/cp-zookeeper:latest
@@ -20,7 +25,7 @@ services:
     ports:
       - 32181:2181
 
-  kafka-1:
+  kafka-broker-1:
     image: confluentinc/cp-kafka:latest
     hostname: broker1
     container_name: broker1
@@ -37,7 +42,7 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-  kafka-2:
+  kafka-broker-2:
     image: confluentinc/cp-kafka:latest
     hostname: broker2
     container_name: broker2
@@ -61,8 +66,8 @@ services:
     depends_on:
       - zookeeper-1
       - zookeeper-2
-      - broker-1
-      - broker-2
+      - kafka-broker-1
+      - kafka-broker-2
     ports:
       - 8083:8083
 
@@ -81,8 +86,31 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_INITDB_DATABASE: tyranny_account
+      MONGO_INITDB_DATABASE: palaver
     volumes:
       - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
 
-     
+  postgres:
+    image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:legacy
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgres
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_SCHEMA: public
+      DB_PASSWORD: password
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: Pa55w0rd
+    ports:
+      - 9090:8080
+    depends_on:
+      - postgres
