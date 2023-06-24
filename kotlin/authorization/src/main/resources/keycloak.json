@@ -1,0 +1,8 @@
+{
+  "realm": "palaver",
+  "auth-server-url" : "http://ares:9090/auth",
+  "resource" : "palaver-auth",
+  "credentials": {
+    "secret": "M6CVDJiBLOl7hJDxcU58M8oe4xd8Ps7R"
+  }
+}

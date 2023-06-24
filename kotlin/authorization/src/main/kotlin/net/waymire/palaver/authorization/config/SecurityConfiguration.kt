@@ -1,4 +1,4 @@
-package net.waymire.palaver.authentication.config
+package net.waymire.palaver.authorization.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

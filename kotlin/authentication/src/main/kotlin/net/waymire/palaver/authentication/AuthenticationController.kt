@@ -1,18 +1,14 @@
 package net.waymire.palaver.authentication
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
-import org.springframework.security.authentication.BadCredentialsException
-import org.springframework.util.LinkedMultiValueMap
-import org.springframework.util.MultiValueMap
+import org.keycloak.TokenVerifier
+import org.keycloak.authorization.client.AuthzClient
+import org.keycloak.representations.AccessToken
+import org.keycloak.representations.idm.authorization.AuthorizationRequest
+import org.keycloak.representations.idm.authorization.AuthorizationResponse
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.client.RestTemplate
 
 data class LoginRequest(val username: String, val password: String)
 
@@ -30,37 +26,42 @@ data class AuthResponse(
     @JsonProperty("not-before-policy")
     val notBeforePolicy: Long,
     @JsonProperty("session_state")
-    val sessionState: String,
+    val sessionState: String? = null,
     @JsonProperty("scope")
-    val scope: String
+    val scope: String? = null
+)
+
+private fun AuthorizationResponse.toDto() = AuthResponse(
+    accessToken = this.token,
+    expiresIn = this.expiresIn,
+    refreshExpiresIn = this.refreshExpiresIn,
+    refreshToken = this.refreshToken,
+    tokenType = this.tokenType,
+    scope = this.scope,
+    sessionState = this.sessionState,
+    notBeforePolicy = this.notBeforePolicy.toLong()
 )
 
 @RestController
-class AuthenticationController(
-    private val restTemplate: RestTemplate,
-    @Value("\${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
-    private val jwtIssuerUri: String
-) {
+class AuthenticationController {
+    private val logger by LoggerDelegate()
+
     @PostMapping("/authenticate")
-    fun login(@RequestBody request: LoginRequest): AuthResponse {
-        return requestAuth(request) ?: throw BadCredentialsException("invalid credentials")
-    }
+    fun login(@RequestBody login: LoginRequest): AuthResponse {
+        val authClient = AuthzClient.create()
+        val authRequest = AuthorizationRequest()
+        val authResponse = authClient.authorization(login.username, login.password).authorize(authRequest)
+        val token = TokenVerifier.create(authResponse.token, AccessToken::class.java).token
 
-    private fun requestAuth(request: LoginRequest): AuthResponse? {
-        val headers = HttpHeaders().apply {
-            contentType = MediaType.APPLICATION_FORM_URLENCODED
-        }
+        logger.info { "Realm Roles: ${token.realmAccess.roles.joinToString()}" }
 
-        val body: MultiValueMap<String, String> = LinkedMultiValueMap()
-        body.add("grant_type", "password")
-        body.add("client_id", "login-app")
-        body.add("username", request.username)
-        body.add("password", request.password)
+        token.resourceAccess.forEach { (k, v) -> logger.info { "Client '$k' => Roles '${v.roles.joinToString()}'"}}
 
-        val entity: HttpEntity<MultiValueMap<String, String>> = HttpEntity(body, headers)
+        val requestingPartyToken = authClient.protection().introspectRequestingPartyToken(authResponse.token)
+        logger.info { "Token status is ${requestingPartyToken.active}" }
+        logger.info { "Permissions: ${requestingPartyToken.permissions.joinToString()}" }
 
-        val response = restTemplate.exchange("$jwtIssuerUri/protocol/openid-connect/token", HttpMethod.POST, entity, AuthResponse::class.java)
-        return response.body
+        return authResponse.toDto()
     }
 }
 

@@ -6,6 +6,7 @@ plugins {
 	id("org.flywaydb.flyway") version "9.19.4"
 	kotlin("jvm") version "1.8.21"
 	kotlin("plugin.spring") version "1.8.21"
+	kotlin("plugin.jpa") version "1.8.21"
 }
 
 group = "net.waymire.palaver"
@@ -31,11 +32,14 @@ dependencies {
 
 	implementation("org.flywaydb:flyway-core")
 
-	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("org.springframework.boot:spring-boot-starter-webflux")
+	implementation("org.postgresql:postgresql:42.6.0")
+
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 	implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("org.springframework.boot:spring-boot-starter-webflux")
 
 
 	compileOnly("jakarta.servlet:jakarta.servlet-api:6.0.0")
@@ -64,5 +68,5 @@ flyway {
 	url = System.getenv("PALAVER_DB_URL")
 	user = System.getenv("PALAVER_DB_USER")
 	password = System.getenv("PALAVER_DB_PASSWORD")
-	locations = arrayOf("filesystem:resources/db/migration")
+	locations = arrayOf("filesystem:src/main/resources/db/migration")
 }

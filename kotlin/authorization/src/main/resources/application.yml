@@ -1,0 +1,36 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: palaver
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9090/auth/realms/palaver
+          jwk-set-uri: http://localhost:9090/auth/realms/palaver/protocol/openid-connect/certs
+  datasource:
+    url: ${PALAVER_DB_URL:jdbc:postgresql://ares:5432/palaver}
+    username: ${PALAVER_DB_USER:keycloak}
+    password: ${PALAVER_DB_PASSWORD:password}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQL95Dialect
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    locations:
+      - classpath:db/migration
+
+jwt:
+  auth:
+    converter:
+      resource-id: login-app
+      principal-attribute: preferred_username
+
+logging:
+  level:
+    root: DEBUG
+    org.springframework.security: DEBUG

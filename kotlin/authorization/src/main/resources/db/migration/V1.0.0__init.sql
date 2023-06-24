@@ -1,0 +1,35 @@
+CREATE TABLE "ROLE" (
+    "id" VARCHAR(255) PRIMARY KEY,
+    "name" VARCHAR(255) UNIQUE NOT NULL,
+    "parent_id" VARCHAR(255)
+);
+
+CREATE TABLE "CAPABILITY" (
+    "id" VARCHAR(255) PRIMARY KEY,
+    "name" VARCHAR(255) UNIQUE NOT NULL
+);
+
+CREATE TABLE "AUTHORIZATION" (
+    "id" VARCHAR(255) PRIMARY KEY,
+    "resource_id" VARCHAR(255),
+    "capability_id" VARCHAR(255)
+);
+
+CREATE TABLE "ROLE_USER" (
+    "role_id" VARCHAR(255),
+    "user_id" VARCHAR(255),
+    PRIMARY KEY ("role_id", "user_id")
+);
+
+CREATE TABLE "ROLE_AUTHORIZATION" (
+    "role_id" VARCHAR(255),
+    "authorization_id" VARCHAR(255),
+    PRIMARY KEY ("role_id", "authorization_id")
+);
+
+CREATE UNIQUE INDEX ON "AUTHORIZATION" ("resource_id", "capability_id");
+ALTER TABLE "ROLE" ADD FOREIGN KEY ("parent_id") REFERENCES "ROLE" ("id");
+ALTER TABLE "AUTHORIZATION" ADD FOREIGN KEY ("capability_id") REFERENCES "CAPABILITY" ("id");
+ALTER TABLE "ROLE_USER" ADD FOREIGN KEY ("role_id") REFERENCES "ROLE" ("id");
+ALTER TABLE "ROLE_AUTHORIZATION" ADD FOREIGN KEY ("role_id") REFERENCES "ROLE" ("id");
+ALTER TABLE "ROLE_AUTHORIZATION" ADD FOREIGN KEY ("authorization_id") REFERENCES "AUTHORIZATION" ("id");
